@@ -1,0 +1,92 @@
+
+    Sub StockData()
+
+        Dim WS As Worksheet
+            For Each WS In ActiveWorkbook.Worksheets
+            WS.Activate
+                ' Determine the Last Row
+                LastRow = WS.Cells(Rows.Count, 1).End(xlUp).Row
+        ' Add headings for summarized data
+            Cells(1, "I").Value = "Ticker"
+            Cells(1, "J").Value = "Yearly Change"
+            Cells(1, "K").Value = "Percent Change"
+            Cells(1, "L").Value = "Total Stock Volume"
+
+        ' Define variables
+            Dim Ticker As String
+            Dim YearlyChange As Double
+            Dim PercentageChange As Double
+            Dim TotalStockVolume As Double
+                TotalStockVolume = 0
+            Dim YearOpen As Double
+                YearOpen = Cells(2, 3).Value
+            Dim ClosePrice As Double
+
+        ' Keep track of the location for each ticker in the summary table
+            Dim Summary_Table_Row As Integer
+            Summary_Table_Row = 2
+        
+        ' Start the for loop to loop thru each row of stock data
+        
+        For i = 2 To LastRow
+
+            ' Check if we are still within the same ticker, if it is not...
+            If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+
+                ' Set the Ticker
+                Ticker = Cells(i, 1).Value
+
+                ' Print the Ticker in the Summary Table
+                Range("I" & Summary_Table_Row).Value = Ticker
+
+
+                ' Calculate yearly change from the opening price at the beginning of a given year to the closing price at the end of that year.
+
+                    
+                    YearClose = Cells(i, 6).Value
+
+                    YearlyChange = YearClose - YearOpen
+                   
+
+                    ' Print yearly change in the Summary Table
+                    Range("J" & Summary_Table_Row).Value = YearlyChange
+
+                'Calculate percentage change
+                    PercentageChange = (YearlyChange / YearOpen) * 100
+                    YearOpen = Cells(i + 1, 3).Value
+                ' Print percentage change in the Summary Table
+                    Range("K" & Summary_Table_Row).Value = PercentageChange
+
+
+                ' Print the Volume to the Summary Table
+                    Range("L" & Summary_Table_Row).Value = TotalStockVolume
+
+                    ' Add one to the summary table row
+                    Summary_Table_Row = Summary_Table_Row + 1
+                    
+                    ' Reset the Volume
+                    TotalStockVolume = 0
+
+            ' If the cell immediately following a row is the same ticker...
+            Else
+                ' Add to the Volume
+                TotalStockVolume = TotalStockVolume + Cells(i, 7).Value
+            End If
+
+        Next i
+
+        'Set yearlychange last row
+        YCLastRow = WS.Cells(Rows.Count, 10).End(xlUp).Row
+        
+        ' Set the Cell Colors
+            For j = 2 To YCLastRow
+                If (Cells(j, 10).Value >= 0) Then
+                    Cells(j, 10).Interior.ColorIndex = 4
+                ElseIf Cells(j, 10).Value < 0 Then
+                    Cells(j, 10).Interior.ColorIndex = 3
+                End If
+            Next j
+
+        Next WS
+
+    End Sub
